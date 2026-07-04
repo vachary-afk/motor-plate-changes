@@ -96,6 +96,7 @@
   /* ---------- Body / scroll area ---------- */
   .content{
     flex:1;
+    min-height:0;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -168,10 +169,11 @@
 
   /* ---------- Panels ---------- */
   .panel{width:min(308px, calc(100% - 32px));display:none;flex-direction:column;padding-bottom:24px;}
-  .panel.active{display:flex;}
+  .panel.active{display:flex;flex:1 1 auto;min-height:0;}
 
   /* Emirate list */
-  .emirate-list{display:flex;flex-direction:column;}
+  .emirate-list{display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto;width:100%;}
+  .emirate-list::-webkit-scrollbar{width:0;}
   .emirate-item{
     padding:14px 4px;font-size:15px;font-weight:500;color:var(--gray-900);
     border:none;background:transparent;text-align:left;cursor:pointer;
@@ -184,11 +186,22 @@
   .emirate-item.selected .check{display:block;}
 
   /* Keyboards */
-  .keys{display:grid;gap:10px;}
-  .keys.alpha{grid-template-columns:repeat(4,1fr);}
-  .keys.num{grid-template-columns:repeat(3,1fr);}
+  /* The keyboard flexes to fill the space left below the tabs, and its rows
+     share that height equally (grid-auto-rows:1fr). On short screens the keys
+     shrink so the whole keyboard — including the delete key — stays on screen;
+     max-height stops them ballooning on tall screens. */
+  .keys{
+    display:grid;gap:clamp(6px,1.4vh,10px);
+    flex:1 1 auto;min-height:0;width:100%;
+    /* Rows share the available height but never drop below a tappable floor;
+       if even the floor won't fit, the area scrolls rather than making
+       unusable keys. */
+    grid-auto-rows:minmax(clamp(28px,4.4vh,40px),1fr);
+  }
+  .keys.alpha{grid-template-columns:repeat(4,1fr);max-height:392px;}
+  .keys.num{grid-template-columns:repeat(3,1fr);max-height:236px;}
   .key{
-    height:39px;border:1.5px solid var(--gray-400);background:#fff;border-radius:4px;
+    min-height:0;border:1.5px solid var(--gray-400);background:#fff;border-radius:4px;
     font-size:13px;font-weight:500;color:#000;cursor:pointer;
     display:flex;align-items:center;justify-content:center;transition:all .12s;
     padding:0;
@@ -236,6 +249,17 @@
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
   .hint{color:#8b8b93;font-size:11px;text-align:center;margin-top:14px;}
+
+  /* ---------- Short screens: tighten the vertical rhythm so the keyboard
+       (and its delete key) never gets pushed off-screen ---------- */
+  @media (max-height:760px){
+    .content{padding-top:12px;}
+    .heading{font-size:17px;line-height:1.3;margin-bottom:12px;}
+    .tabs{margin:14px 0 12px;}
+    .special{margin-top:12px;}
+    .special .label{margin-bottom:6px;}
+    .panel{padding-bottom:12px;}
+  }
 
   /* ---------- Real-device / mobile: fill the screen like a native app ---------- */
   @media (max-width:600px){
